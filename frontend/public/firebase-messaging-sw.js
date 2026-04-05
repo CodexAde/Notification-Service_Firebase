@@ -1,4 +1,3 @@
-// Bhai, service worker module nahi hota isliye importScripts use karna padega
 importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js');
 

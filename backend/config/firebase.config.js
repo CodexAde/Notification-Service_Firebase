@@ -12,20 +12,19 @@ const initializeFirebase = () => {
         clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
       };
 
-      // Check if credentials are valid
       if (!serviceAccount.projectId || !serviceAccount.privateKey || !serviceAccount.clientEmail) {
-        console.warn("BHAI WARNING: Firebase Admin credentials missing in .env! Notifications might fail.");
+        console.warn("Firebase Admin credentials missing in .env. Notifications may fail.");
         return null;
       }
 
       admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),
       });
-      console.log("Bhai, Firebase Admin initialized successfully!");
+      console.log("Firebase Admin initialized successfully.");
     }
     return admin;
   } catch (error) {
-    console.error("Bhai, Firebase Admin init error:", error);
+    console.error("Firebase Admin initialization error:", error);
     return null;
   }
 };

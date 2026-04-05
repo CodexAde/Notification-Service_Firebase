@@ -16,7 +16,7 @@ const MainLayout = () => {
         <Outlet />
       </main>
       <footer className="p-4 text-center text-text-muted text-sm glass">
-        Built by Antigravity Bhai
+        Built by Antigravity
       </footer>
     </div>
   );

@@ -6,13 +6,13 @@ import { getAnalytics } from "firebase/analytics";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyB_ZtUgtC0cR-FDTvDR-UPy0N42dEA8v9I",
-  authDomain: "cemail-bf0aa.firebaseapp.com",
-  projectId: "cemail-bf0aa",
-  storageBucket: "cemail-bf0aa.firebasestorage.app",
-  messagingSenderId: "945058766923",
-  appId: "1:945058766923:web:0a2200c1bf52ca25fe6dce",
-  measurementId: "G-JL9D3GP38X"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 const app = initializeApp(firebaseConfig);
@@ -30,56 +30,47 @@ function App() {
         localStorage.setItem('notificationPermission', permission);
         
         if (permission === 'granted') {
-          console.log('Bhai, Notification permission granted!');
+          console.log('Notification permission granted');
           
           if (messaging) {
-            // Bhai check kar lo ki VAPID key placeholder toh nahi hai
             const vapidKey = import.meta.env.VITE_VAPID_KEY;
-            if (!vapidKey || vapidKey === 'YOUR_FIREBASE_VAPID_KEY_BHAI') {
-                console.error('BHAI, VAPID KEY missing ya placeholder hai!');
+            if (!vapidKey) {
+                console.error('VAPID key is missing');
                 return;
             }
 
-            // Bhai manual service worker check/register for better results
             await navigator.serviceWorker.register('/firebase-messaging-sw.js')
-                .catch(err => console.error('Bhai SW registration fail:', err));
+                .catch(err => console.error('Service worker registration failed:', err));
 
-            // Wait for service worker to be ready (active)
             const swReady = await navigator.serviceWorker.ready;
 
-            // Bhai VAPID key ke sath token mangate hain
             const currentToken = await getToken(messaging, {
                 vapidKey: vapidKey,
                 serviceWorkerRegistration: swReady
             }).catch(err => {
-                console.error('Bhai, Token lene mein error aya:', err);
-                console.log('Bhai ek baar site storage clear karke reload karo.');
+                console.error('Error obtaining token:', err);
             });
 
             if (currentToken) {
-                console.log('====================================');
-                console.log('BHAI, APKA DEVICE TOKEN YE HAI:');
-                console.log(currentToken);
-                console.log('====================================');
+                console.log('Device token:', currentToken);
                 localStorage.setItem('fcmToken', currentToken);
                 
-                // Foreground mein message aaye toh ye logic chalega bhai
                 onMessage(messaging, (payload) => {
-                    console.log('Bhai, foreground mein message aaya:', payload);
+                    console.log('Foreground message received:', payload);
                     new Notification(payload.notification.title, {
                         body: payload.notification.body,
-                        icon: '/firebase-logo.png' // Agar icon na ho toh standard vite.svg use kar sakte hain
+                        icon: '/firebase-logo.png'
                     });
                 });
             } else {
-                console.log('Bhai, Token nahi mila. Service worker issue ho sakta hai.');
+                console.log('Token not found');
             }
           }
         } else {
-          console.log('Bhai, Notification permission denied:', permission);
+          console.log('Notification permission denied:', permission);
         }
       } catch (error) {
-        console.error('Bhai Error in requestNotificationPermission:', error);
+        console.error('Error in requestNotificationPermission:', error);
       }
     };
 

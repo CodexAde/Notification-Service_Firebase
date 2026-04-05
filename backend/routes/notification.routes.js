@@ -7,30 +7,30 @@ const router = Router();
 
 router.route("/test").get(asyncHandler(async (req, res) => {
     return res.status(200).json(
-        new ApiResponse(200, {}, "Bhai, Notification API is working!")
+        new ApiResponse(200, {}, "Notification API is functional.")
     );
 }));
 
 router.route("/send").post(asyncHandler(async (req, res) => {
-    console.log("Bhai, /send route hit hua hai! Body:", req.body);
+    console.log("/send route accessed. Body:", req.body);
     const { registrationIds, title, body } = req.body;
 
     try {
         const data = {
-            title: title || "Bhai ka message!",
-            body: body || "Bhai ne push kar diya!",
+            title: title || "New Notification",
+            body: body || "You have a new message.",
             topic: 'all'
         };
 
         const results = await sendPushNotification(registrationIds, data);
 
         return res.status(200).json(
-            new ApiResponse(200, results, "Notification sent successfully bhai!")
+            new ApiResponse(200, results, "Notification sent successfully.")
         );
     } catch (error) {
-        console.error("Bhai Error in /send:", error);
+        console.error("Error in /send:", error);
         return res.status(500).json(
-            new ApiResponse(500, { detail: error.message }, "Bhai notification send nahi ho payi. Valid Server Key use karo.")
+            new ApiResponse(500, { detail: error.message }, "Failed to send notification.")
         );
     }
 }));
