@@ -14,12 +14,6 @@ router.route("/test").get(asyncHandler(async (req, res) => {
 router.route("/send").post(asyncHandler(async (req, res) => {
     console.log("Bhai, /send route hit hua hai! Body:", req.body);
     const { registrationIds, title, body } = req.body;
-    
-    if (!process.env.FIREBASE_SERVER_KEY) {
-        return res.status(401).json(
-            new ApiResponse(401, {}, "Bhai, FIREBASE_SERVER_KEY missing hai! .env mein daal do.")
-        );
-    }
 
     try {
         const data = {

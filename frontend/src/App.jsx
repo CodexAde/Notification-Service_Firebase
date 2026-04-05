@@ -3,7 +3,7 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import AppRoutes from './routes/Route';
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import { getMessaging, getToken } from "firebase/messaging";
+import { getMessaging, getToken, onMessage } from "firebase/messaging";
 
 const firebaseConfig = {
   apiKey: "AIzaSyB_ZtUgtC0cR-FDTvDR-UPy0N42dEA8v9I",
@@ -33,9 +33,27 @@ function App() {
           console.log('Bhai, Notification permission granted!');
           
           if (messaging) {
-            // Bhai agar VAPID key nahi hai toh getToken bina options ke try karte hain
-            const currentToken = await getToken(messaging).catch(err => {
-                console.log('Bhai, Token lene mein error aya:', err);
+            // Bhai check kar lo ki VAPID key placeholder toh nahi hai
+            const vapidKey = import.meta.env.VITE_VAPID_KEY;
+            if (!vapidKey || vapidKey === 'YOUR_FIREBASE_VAPID_KEY_BHAI') {
+                console.error('BHAI, VAPID KEY missing ya placeholder hai!');
+                return;
+            }
+
+            // Bhai manual service worker check/register for better results
+            await navigator.serviceWorker.register('/firebase-messaging-sw.js')
+                .catch(err => console.error('Bhai SW registration fail:', err));
+
+            // Wait for service worker to be ready (active)
+            const swReady = await navigator.serviceWorker.ready;
+
+            // Bhai VAPID key ke sath token mangate hain
+            const currentToken = await getToken(messaging, {
+                vapidKey: vapidKey,
+                serviceWorkerRegistration: swReady
+            }).catch(err => {
+                console.error('Bhai, Token lene mein error aya:', err);
+                console.log('Bhai ek baar site storage clear karke reload karo.');
             });
 
             if (currentToken) {
@@ -44,15 +62,24 @@ function App() {
                 console.log(currentToken);
                 console.log('====================================');
                 localStorage.setItem('fcmToken', currentToken);
+                
+                // Foreground mein message aaye toh ye logic chalega bhai
+                onMessage(messaging, (payload) => {
+                    console.log('Bhai, foreground mein message aaya:', payload);
+                    new Notification(payload.notification.title, {
+                        body: payload.notification.body,
+                        icon: '/firebase-logo.png' // Agar icon na ho toh standard vite.svg use kar sakte hain
+                    });
+                });
             } else {
-                console.log('Bhai, Token nahi mila. Service worker check karo.');
+                console.log('Bhai, Token nahi mila. Service worker issue ho sakta hai.');
             }
           }
         } else {
-          console.log('Bhai, Notification permission denied/default:', permission);
+          console.log('Bhai, Notification permission denied:', permission);
         }
       } catch (error) {
-        console.error('Error requesting notification permission:', error);
+        console.error('Bhai Error in requestNotificationPermission:', error);
       }
     };
 
