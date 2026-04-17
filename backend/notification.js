@@ -1,37 +1,30 @@
-import PushNotifications from 'node-pushnotifications';
+import { sendPushNotification } from './services/notification.service.js';
+import initializeFirebase from './config/firebase.config.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
+initializeFirebase();
 
-const settings = {
-    gcm: {
-        id: process.env.FIREBASE_SERVER_KEY || 'YOUR_FIREBASE_SERVER_KEY',
-    },
-};
-
-const push = new PushNotifications(settings);
-
-const registrationIds = []; 
+const registrationIds = process.argv[2] ? [process.argv[2]] : []; 
 
 const data = {
-    title: 'Notification',
-    body: 'New notification received from backend',
-    topic: 'all',
+    title: 'Notification Test',
+    body: 'Notification from backend script bhai!',
     custom: {
         sender: 'Antigravity'
     }
 };
 
-console.log('Sending notification...');
+console.log('Sending notification via modern service...');
 
 if (registrationIds.length === 0) {
-    console.log('Registration IDs are empty. Please add tokens from the frontend.');
+    console.log('No registration token provided. Usage: node notification.js <YOUR_TOKEN>');
 } else {
-    push.send(registrationIds, data)
+    sendPushNotification(registrationIds, data)
         .then((results) => {
-            console.log('Notification results:', results);
+            console.log('Final results:', results);
         })
         .catch((err) => {
-            console.error('Error sending notification:', err);
+            console.error('Fatal error during send:', err.message);
         });
 }
